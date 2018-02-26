@@ -72,7 +72,22 @@ def printFigure(X, title):
     plt.savefig(title + ".png")
 
 def scenario3_3():
-    print("TODO")
+    with open("../pict.dat", "r") as f:
+        line = f.readlines()[0]
+    X = np.array(list(map(int, line.split(","))))
+    X = X.reshape((11,1024))
+
+    HF = hopfield.HopfieldNetwork(pattern_number=1024)
+    HF.store(X[:3])
+
+    print(HF.E(X[0]))
+    print(HF.E(X[1]))
+    print(HF.E(X[2]))
+
+    print(HF.E(np.random.choice([-1, 1], 1024)))
+    print(HF.E(np.random.choice([-1, 1], 1024)))
+    print(HF.E(np.random.choice([-1, 1], 1024)))
+
 
 def scenario3_4():
     print("TODO")
