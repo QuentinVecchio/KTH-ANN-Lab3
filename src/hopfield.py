@@ -3,6 +3,7 @@ import itertools
 import random as rd
 import copy
 
+
 class HopfieldNetwork:
     def __init__(self, pattern_number):
         self.pattern_number = pattern_number
@@ -48,6 +49,26 @@ class HopfieldNetwork:
                 X[k] = np.sign(s)
         return X
 
+    def sequentialUpdate(self, X, theta):
+        if len(X.shape) == 2:
+            for i in range(len(X)):
+                arr = np.arange(self.pattern_number)
+                np.random.shuffle(arr)
+                for k in arr:
+                    s = 0
+                    for j in range(len(X)):
+                        s += self.W[k][j] * X[i][j]
+                    X[i][k] = 0.5 + 0.5 * np.sign(s - theta)
+        else:
+            arr = np.arange(self.pattern_number)
+            np.random.shuffle(arr)
+            for k in arr:
+                s = 0
+                for j in range(len(X)):
+                    s += self.W[k][j] * X[j]
+                X[k] = 0.5 + 0.5 * np.sign(s - theta)
+        return X
+
     def removeDiag(self):
         self.W = self.W - np.diag(np.diag(self.W))
 
@@ -57,12 +78,12 @@ class HopfieldNetwork:
         arr = np.arange(self.pattern_number)
         np.random.shuffle(arr)
         for k in arr:
-            i+=1
+            i += 1
             s = 0
             for j in range(len(X)):
                 s += self.W[k][j] * X[j]
             X[k] = np.sign(s)
-            if i%100 == 0:
+            if i % 100 == 0:
                 print(self.E(X))
         print(self.E(X))
         return X
@@ -73,12 +94,12 @@ class HopfieldNetwork:
         i = 0
         Xs = []
         for k in arr:
-            i+=1
+            i += 1
             s = 0
             for j in range(len(X)):
                 s += self.W[k][j] * X[j]
             X[k] = np.sign(s)
-            if i%100 == 0:
+            if i % 100 == 0:
                 Xs.append(copy.deepcopy(X))
         Xs.append(X)
         return Xs
@@ -95,14 +116,13 @@ class HopfieldNetwork:
 
     def computeW(self, X):
         W = np.dot(X.T, X)
-        print("W computed.")
         return W
 
     def store(self, X):
         np.set_printoptions(threshold=np.inf)
 
         self.W = self.computeW(X)
-        #print(self.W)
+        # print(self.W)
 
     def searchFixedPoint(self, X):
         X = self.littleModel(X)
@@ -113,16 +133,16 @@ class HopfieldNetwork:
             X_T = self.littleModel(X)
             fixed = np.array_equal(X_T, X)
             X = X_T
-        print(str(i-1) + " steps.")
+        print(str(i - 1) + " steps.")
         return X
 
     def searchAllFixedPoint(self):
-        permut = ["".join(seq) for seq in itertools.product("01", repeat=self.pattern_number)]
+        permut = ["".join(seq) for seq in itertools.product(
+            "01", repeat=self.pattern_number)]
         X = np.zeros((len(permut), self.pattern_number))
         for i in range(len(permut)):
             for j in range(self.pattern_number):
                 X[i][j] = int(permut[i][j].replace("0", "-1"))
-
 
         points = self.searchFixedPoint(X)
         points = np.unique(points, axis=0)
@@ -138,3 +158,11 @@ class HopfieldNetwork:
             for j in range(self.pattern_number):
                 e += self.W[i][j] * x[i] * x[j]
         return -e
+
+    def getActivity(self, X):
+        rho = 0
+        for i in range(len(X)):
+            for j in range(self.pattern_number):
+                rho += X[i][j]
+        rho = rho * (1 / (len(X) * self.pattern_number))
+        return rho

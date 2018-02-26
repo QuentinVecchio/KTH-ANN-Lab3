@@ -4,6 +4,7 @@ import scipy.misc
 import matplotlib.pyplot as plt
 import random as rd
 import copy
+import math
 
 
 def scenario3_1():
@@ -202,7 +203,8 @@ def scenario3_5_1():
             if (not(np.array_equal(temp, X[i]))):
                 print("Recover error.")
 
-    X = (np.random.randint(2, size=1024*50)*2-np.ones(1024*50)).reshape((50, 1024))
+    X = (np.random.randint(2, size=1024 * 50) *
+         2 - np.ones(1024 * 50)).reshape((50, 1024))
     for i in range(50):
         print("Number of stored images " + str(i))
         HF.store(X[:i])
@@ -218,10 +220,12 @@ def scenario3_5_1():
             if (not(np.array_equal(temp, X[i]))):
                 print("Recover error.")
 
+
 def scenario3_5_2():
     nbError = []
     HF = hopfield.HopfieldNetwork(pattern_number=100)
-    X = (np.random.randint(2, size=300*100)*2-np.ones(300*100)).reshape((300, 100))
+    X = (np.random.randint(2, size=300 * 100) *
+         2 - np.ones(300 * 100)).reshape((300, 100))
     for i in range(100):
         print("Number of stored images " + str(i))
         HF.store(X[:i])
@@ -231,7 +235,7 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
@@ -254,17 +258,19 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
-    plt.title("Number of stable patterns vs the number of learned pattern with noise")
+    plt.title(
+        "Number of stable patterns vs the number of learned pattern with noise")
     plt.show()
     print(nbError)
 
     nbError = []
     HF = hopfield.HopfieldNetwork(pattern_number=100)
-    X = (np.random.randint(2, size=300*100)*2-np.ones(300*100)).reshape((300, 100))
+    X = (np.random.randint(2, size=300 * 100) *
+         2 - np.ones(300 * 100)).reshape((300, 100))
     for i in range(100):
         print("Number of stored images " + str(i))
         HF.store(X[:i])
@@ -275,7 +281,7 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
@@ -299,17 +305,18 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
-    plt.title("Number of stable patterns vs the number of learned pattern with noise no diag with bias")
+    plt.title(
+        "Number of stable patterns vs the number of learned pattern with noise no diag with bias")
     plt.show()
     print(nbError)
 
-
     nbError = []
-    X = np.sign(np.random.rand(300*100)-0.25*np.ones(300*100)).reshape((300, 100))
+    X = np.sign(np.random.rand(300 * 100) - 0.25 *
+                np.ones(300 * 100)).reshape((300, 100))
     print(X)
     for i in range(100):
         print("Number of stored images " + str(i))
@@ -320,7 +327,7 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
@@ -343,13 +350,51 @@ def scenario3_5_2():
         for i in range(len(noised)):
             temp = HF.littleModel(noised[i])
             if (np.array_equal(temp, X[i])):
-                nb+=1
+                nb += 1
         nbError.append(nb)
 
     plt.plot(nbError)
-    plt.title("Number of stable patterns vs the number of learned pattern with noise")
+    plt.title(
+        "Number of stable patterns vs the number of learned pattern with noise")
     plt.show()
     print(nbError)
 
+
 def scenario3_6():
-    print("TODO")
+    pn = 30
+    HF = hopfield.HopfieldNetwork(pattern_number=pn)
+    for t in [0.4, 0.45, 0.49]:
+        X = np.random.rand(40 * pn) - t * np.ones(40 * pn)
+        for i in range(len(X)):
+            if X[i] >= 0.5:
+                X[i] = 1
+            else:
+                X[i] = 0
+        X = X.reshape((40, pn))
+        print("Activity: ")
+        print(HF.getActivity(X))
+        thetas = np.linspace(0, 5, num=20)
+        for theta in thetas:
+            again = True
+            k=0
+
+            while again and k <= 40:
+                k+=1
+                HF.store(X[:k] - np.ones(X[:k].shape) * HF.getActivity(X[:k]))
+
+                noised = copy.deepcopy(X[:k])
+                nb = 0
+                for i in range(len(noised)):
+                    temp = HF.sequentialUpdate(noised[i], theta)
+                    if (np.array_equal(temp, X[i])):
+                        nb += 1
+                if nb != len(noised):
+                    again = False
+                    k-=1
+
+
+            x = 0.5 - t
+            x = int(x*100)
+            x = (float(x))/100
+
+            print("Activity: " + str(x) + "  For theta = " + str(theta) + " we have stored " + str(i) + " patterns.")
