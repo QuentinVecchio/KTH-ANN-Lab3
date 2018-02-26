@@ -48,6 +48,9 @@ class HopfieldNetwork:
                 X[k] = np.sign(s)
         return X
 
+    def removeDiag(self):
+        self.W = self.W - np.diag(np.diag(self.W))
+
     def sequentialUpdatePrintE(self, X):
         print(self.E(X))
         i = 0
