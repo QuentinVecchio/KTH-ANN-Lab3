@@ -2,6 +2,8 @@ import hopfield
 import numpy as np
 import scipy.misc
 import matplotlib.pyplot as plt
+import random as rd
+import copy
 
 def scenario3_1():
     x1=[-1, -1, 1, -1, 1, -1, -1, 1]
@@ -82,19 +84,96 @@ def scenario3_3():
     HF = hopfield.HopfieldNetwork(pattern_number=1024)
     HF.store(X[:3])
 
+    print("Energy attractors")
+
     print(HF.E(X[0]))
     print(HF.E(X[1]))
     print(HF.E(X[2]))
 
+    print("Energy random points")
+
     print(HF.E(np.random.choice([-1, 1], 1024)))
     print(HF.E(np.random.choice([-1, 1], 1024)))
     print(HF.E(np.random.choice([-1, 1], 1024)))
 
-    print(HF.searchFixedPoint(np.random.choice([-1, 1], 1024)))
+    print("Energy over iterations")
+
+    HF.sequentialUpdatePrintE(np.random.choice([-1, 1], 1024))
+
+    print("Energy over iterations for random W")
+    W = np.random.normal(0, 1, 1024*1024).reshape((1024, 1024))
+
+    HF.setW(W)
+    HF.sequentialUpdatePrintE(np.random.choice([-1, 1], 1024))
+
+    print("Energy over iterations for random W but symetric")
+
+    HF.setW(0.5 * (W + W.T))
+    HF.sequentialUpdatePrintE(np.random.choice([-1, 1], 1024))
+
+    print("WHATS HAPPEN ????")
 
 
 def scenario3_4():
-    print("TODO")
+    with open("../pict.dat", "r") as f:
+        line = f.readlines()[0]
+    X = np.array(list(map(int, line.split(","))))
+    X = X.reshape((11,1024))
+
+    HF = hopfield.HopfieldNetwork(pattern_number=1024)
+    HF.store(X[:3])
+
+    p1 = X[0]
+    p2 = X[1]
+    p3 = X[2]
+
+    noise = [0, 0.1, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1]
+    l = np.arange(1024)
+    np.random.shuffle(l)
+
+    for x in noise:
+        p1d = copy.deepcopy(X[0])
+        p2d = copy.deepcopy(X[1])
+        p3d = copy.deepcopy(X[2])
+        print("")
+        print("noise: " + str(x))
+
+        for i in range(int(x*1024)):
+            p1d[l[i]] *= -1
+            p2d[l[i]] *= -1
+            p3d[l[i]] *= -1
+
+        a = HF.littleModel(p1d)
+        b = HF.littleModel(p2d)
+        c = HF.littleModel(p3d)
+
+        #print(a - p1)
+        print("-  Difference p1")
+        m = sum(a-p1)
+        print(m)
+        if m != 0:
+            a1 = HF.searchFixedPoint(p1d)
+            if (np.array_equal(a1, p1)):
+                print("converge to right attractor")
+
+        print("-  Difference p2")
+        m = sum(b-p2)
+        print(m)
+        if m != 0:
+            b1 = HF.searchFixedPoint(p2d)
+            if (np.array_equal(b1, p2)):
+                print("converge to right attractor")
+
+        print("-  Difference p3")
+        m = sum(c-p3)
+        print(m)
+        if m != 0:
+            c1 = HF.searchFixedPoint(p3d)
+            if (np.array_equal(c1, p3)):
+                print("converge to right attractor")
+
+
+
 
 def scenario3_5():
     print("TODO")

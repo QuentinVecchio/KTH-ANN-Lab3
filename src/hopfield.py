@@ -31,7 +31,7 @@ class HopfieldNetwork:
     def sequentialUpdate(self, X):
         if len(X.shape) == 2:
             for i in range(len(X)):
-                arr = np.arange(1024)
+                arr = np.arange(self.pattern_number)
                 np.random.shuffle(arr)
                 for k in arr:
                     s = 0
@@ -39,7 +39,7 @@ class HopfieldNetwork:
                         s += self.W[k][j] * X[i][j]
                     X[i][k] = np.sign(s)
         else:
-            arr = np.arange(1024)
+            arr = np.arange(self.pattern_number)
             np.random.shuffle(arr)
             for k in arr:
                 s = 0
@@ -48,8 +48,24 @@ class HopfieldNetwork:
                 X[k] = np.sign(s)
         return X
 
+    def sequentialUpdatePrintE(self, X):
+        print(self.E(X))
+        i = 0
+        arr = np.arange(self.pattern_number)
+        np.random.shuffle(arr)
+        for k in arr:
+            i+=1
+            s = 0
+            for j in range(len(X)):
+                s += self.W[k][j] * X[j]
+            X[k] = np.sign(s)
+            if i%100 == 0:
+                print(self.E(X))
+        print(self.E(X))
+        return X
+
     def sequentialUpdate100(self, X):
-        arr = np.arange(1024)
+        arr = np.arange(self.pattern_number)
         np.random.shuffle(arr)
         i = 0
         Xs = []
